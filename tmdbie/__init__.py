@@ -7,7 +7,7 @@ Uses https://www.themoviedb.org
 
 
 __author__ = "DefaltSimon"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __license__ = "MIT"
 
 from ._types import Person, TVShow, Movie, Endpoints

@@ -1,2 +1,6 @@
+1.1
+- Added functioning caching
+- Code optimization
+
 1.0
 - First version

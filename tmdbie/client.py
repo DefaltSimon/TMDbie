@@ -1,6 +1,7 @@
+# coding=utf-8
 """
 TMDbie - a python 3.5+ library for getting movie info
-Developed for use in Nano, the discord bot
+Developed for use in Nano, a discord bot
 """
 
 __author__ = "DefaltSimon"
@@ -59,7 +60,7 @@ class Client:
             return None
 
         if check_cache:
-            query_by_name = self.cache.get_from_cache(name=query)
+            query_by_name = self.cache.get_from_cache(query)
             if query_by_name:
                 log.info("Got item from cache")
                 return query_by_name
