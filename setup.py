@@ -11,7 +11,7 @@ extras = {
 }
 
 setup(name='TMDbie',
-      version='1.1.0',
+      version='1.1.1',
       description='Python API wrapper for The Movie Database',
       classifiers=[
           'Development Status :: 4 - Beta',

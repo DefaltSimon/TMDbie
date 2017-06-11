@@ -62,9 +62,15 @@ class Movie:
                 self.__setattr__("trailer", IMDB_VIDEO_BASE.format(value))
                 self.__setattr__(arg, value)
             elif arg == "poster_path":
-                self.__setattr__("poster", Endpoints.POSTER_BASE + value)
+                if not value:
+                    self.__setattr__("poster", None)
+                else:
+                    self.__setattr__("poster", Endpoints.POSTER_BASE + value)
             elif arg == "backdrop_path":
-                self.__setattr__("backdrop", Endpoints.BACKDROP_BASE + value)
+                if not value:
+                    self.__setattr__("backdrop", None)
+                else:
+                    self.__setattr__("backdrop", Endpoints.BACKDROP_BASE + value)
             elif arg == "genres":
                 genres = [name.get("name") for name in value]
                 self.__setattr__(arg, genres)
@@ -97,9 +103,15 @@ class TVShow:
                 self.__setattr__("trailer", IMDB_VIDEO_BASE.format(value))
                 self.__setattr__(arg, value)
             elif arg == "poster_path":
-                self.__setattr__("poster", Endpoints.POSTER_BASE + value)
+                if not value:
+                    self.__setattr__("poster", None)
+                else:
+                    self.__setattr__("poster", Endpoints.POSTER_BASE + value)
             elif arg == "backdrop_path":
-                self.__setattr__("backdrop", Endpoints.BACKDROP_BASE + value)
+                if not value:
+                    self.__setattr__("backdrop", None)
+                else:
+                    self.__setattr__("backdrop", Endpoints.BACKDROP_BASE + value)
             elif arg == "genres":
                 genres = [name.get("name") for name in value]
                 self.__setattr__(arg, genres)

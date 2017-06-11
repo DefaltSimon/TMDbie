@@ -1,3 +1,6 @@
+1.1.1
+- Bugfixes
+
 1.1
 - Added functioning caching
 - Code optimization
