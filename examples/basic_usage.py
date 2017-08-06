@@ -1,13 +1,18 @@
+# coding=utf-8
 import tmdbie
 import asyncio
 import time
 import logging
+import configparser
+
+parser = configparser.ConfigParser()
+parser.read("config.ini")
 
 logging.basicConfig(level=logging.DEBUG)
 loop = asyncio.get_event_loop()
 
 # Insert your api key here
-api_key = ""
+api_key = parser.get("tmdb", "key")
 
 ah = time.time()
 client = tmdbie.Client(api_key)
