@@ -32,3 +32,6 @@ wheels/
 
 # PyCharm ignores
 .idea/
+
+# Things I don't want to commit
+examples/*.ini
