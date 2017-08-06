@@ -1,16 +1,21 @@
+# coding=utf-8
 """
 Types used in TMDbie
 """
-
-import importlib
 import logging
+
+from .cache_manager import CacheManager
+from .abstract import TMDbType
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
+cache = CacheManager()
+
 _BASE = "https://api.themoviedb.org/3"
 
 IMDB_VIDEO_BASE = "http://www.imdb.com/title/{}/videogallery"
+
 
 class Endpoints:
     BASE = "https://api.themoviedb.org/3/"
@@ -44,7 +49,7 @@ class Endpoints:
         EXTERNAL_IDS = _BASE + "/tv/{id}/external_ids"
 
 
-class Movie:
+class Movie(TMDbType):
     __slots__ = (
         "poster", "adult", "overview", "release_date",
         "original_title", "genre_ids", "id", "media_type",
@@ -85,7 +90,7 @@ class Movie:
                     pass
 
 
-class TVShow:
+class TVShow(TMDbType):
     __slots__ = (
         "poster", "adult", "overview", "first_air_date",
         "popularity", "id", "backdrop", "vote_average", "media_type",
@@ -126,8 +131,7 @@ class TVShow:
                     pass
 
 
-
-class Person:
+class Person(TMDbType):
     __slots__ = (
         "profile_path", "adult", "id", "media_type",
         "known_for", "name", "popularity", "imdb_id"
@@ -145,9 +149,16 @@ class Person:
                 if from_cache:
                     known_for.append(from_cache)
                 else:
-                    item = instantiate_type(entry)
-                    if item:
-                        known_for.append(item)
+                    type_ = entry.get("media_type")
+
+                    if type_ == "movie":
+                        item = Movie(**entry)
+                    elif type_ == "tv":
+                        item = TVShow(**entry)
+                    else:
+                        raise RuntimeError
+
+                    known_for.append(item)
 
             # Remove from dict
             kwargs.pop("known_for")
@@ -158,7 +169,3 @@ class Person:
                 self.__setattr__(arg, value)
             except AttributeError:
                 pass
-
-
-cache = importlib.import_module("tmdbie.cache_manager").CacheManager()
-instantiate_type = importlib.import_module("tmdbie.utils").instantiate_type
