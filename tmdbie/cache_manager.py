@@ -4,14 +4,24 @@ Cache manager for TMDbie
 """
 import logging
 import time
-from .utils import Singleton
-from ._types import TVShow, Movie, Person
+
+from .abstract import TMDbType
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
 
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 class CacheManager(metaclass=Singleton):
-    def __init__(self, max_age=21600): # 3 hours
+    def __init__(self, max_age=21600):  # 3 hours
         self.cache = {}
 
         self.name_to_id = {}
@@ -52,10 +62,8 @@ class CacheManager(metaclass=Singleton):
         else:
             return self._get_id_from_cache(search)
 
-
-
     def item_set(self, item):
-        if not isinstance(item, (Movie, TVShow, Person)):
+        if not isinstance(item, TMDbType):
             raise ValueError("invalid item type: {}".format(type(item)))
 
         self.cache[item.id] = item

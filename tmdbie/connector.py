@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 Connector part for TMDbie
 """
@@ -44,8 +45,8 @@ class Connector:
         return UrllibConnector()
 
     @classmethod
-    def get_aiohttp(cls):
-        return AioHttpConnector()
+    def get_aiohttp(cls, loop=asyncio.get_event_loop()):
+        return AioHttpConnector(loop)
 
     @classmethod
     def get_requests(cls):
@@ -106,7 +107,7 @@ class RequestsConnector(Connector, metaclass=Singleton):
 
 
 class AioHttpConnector(Connector, metaclass=Singleton):
-    def __init__(self):
+    def __init__(self, loop=asyncio.get_event_loop()):
         super().__init__()
 
         try:
@@ -115,40 +116,40 @@ class AioHttpConnector(Connector, metaclass=Singleton):
             log.critical("Could not import aiohttp")
             raise ImportError("module aiohttp not found")
 
+        self.session = self.aio.ClientSession(loop=loop, json_serialize=loads)
+
     async def request(self, url, fields: dict, exit_on_ratelimit=False) -> dict:
-        # Make new session
-        async with self.aio.ClientSession() as s:
-            # Make a valid url with all the provided fields
-            formatted_url = self._build_url(url, **fields)
-            log.debug("Sending request to {}".format(formatted_url))
+        # Make a valid url with all the provided fields
+        formatted_url = self._build_url(url, **fields)
+        log.debug("Sending request to {}".format(formatted_url))
 
-            # Send GET request
-            async with s.get(formatted_url) as resp:
-                log.debug("X-Ratelimit-Remaining is {}".format(resp.headers.get("X-Ratelimit-Remaining")))
-                # Check if everything is ok
-                if resp.status == 429:
-                    retry_after = resp.headers.get("Retry-After")
-                    time_delta = time.time() - int(retry_after)
+        # Send GET request
+        async with self.session.get(formatted_url) as resp:
+            log.debug("X-Ratelimit-Remaining is {}".format(resp.headers.get("X-Ratelimit-Remaining")))
+            # Check if everything is ok
+            if resp.status == 429:
+                retry_after = resp.headers.get("Retry-After")
+                time_delta = time.time() - int(retry_after)
 
-                    # Prevent infinite loops
-                    if exit_on_ratelimit:
-                        raise RatelimitException("reached the ratelimit one too many times, try again in {}".format(time_delta))
+                # Prevent infinite loops
+                if exit_on_ratelimit:
+                    raise RatelimitException("reached the ratelimit one too many times, try again in {}".format(time_delta))
 
-                    # If timer is not up, wait
-                    if not (time_delta <= 0):
-                        log.warning("Bucket is exhausted, retrying in {}".format(time_delta))
-                        await asyncio.sleep(time_delta)
+                # If timer is not up, wait
+                if not (time_delta <= 0):
+                    log.warning("Bucket is exhausted, retrying in {}".format(time_delta))
+                    await asyncio.sleep(time_delta)
 
-                    log.warning("Retrying request to tmdb")
-                    return await self.request(url, fields, exit_on_ratelimit=True)
+                log.warning("Retrying request to tmdb")
+                return await self.request(url, fields, exit_on_ratelimit=True)
 
-                if not (200 <= resp.status < 300):
-                    raise HTTPException("Got status code {}".format(resp.status))
+            if not (200 <= resp.status < 300):
+                raise HTTPException("Got status code {}".format(resp.status))
 
-                # Use custom lib for json parsing
-                text = await resp.text()
+            # Use custom lib for json parsing
+            text = await resp.text()
 
-                if not text:
-                    raise DecodeError("empty response")
+            if not text:
+                raise DecodeError("empty response")
 
-                return loads(text)
+            return loads(text)
