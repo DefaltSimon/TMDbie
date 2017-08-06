@@ -13,8 +13,8 @@ from typing import Union
 
 # Library imports
 from .connector import UrllibConnector, RequestsConnector, AioHttpConnector
-from ._types import Endpoints, Movie, Person, TVShow
-from .utils import instantiate_type, get_media_type
+from .types import Endpoints, Movie, Person, TVShow
+from .utils import instantiate_type
 from .cache_manager import CacheManager
 from .exceptions import APIException
 
@@ -54,7 +54,6 @@ class Client:
         # Normalize the payload dict (remove None's)
         return {a: b for a, b in fields.items() if b is not None}
 
-
     async def search_multi(self, query: str, language=None, page=None, include_adult=None, region=None, check_cache=True) -> Union[Movie, TVShow, Person, None]:
         if not query:
             return None
@@ -73,10 +72,10 @@ class Client:
 
         first_entry = entries[0]
 
-        type_ = get_media_type(first_entry)
+        type_ = first_entry.get("media_type")
 
         # Instantiate with additional info
-        if type_ == Movie:
+        if type_ == "movie":
             additional = await self._movie_info(first_entry.get("id"))
             if not additional:
                 raise APIException("no data")
@@ -84,14 +83,14 @@ class Client:
 
             result = Movie(**additional)
 
-        elif type_ == TVShow:
+        elif type_ == "tv":
             additional = await self._tv_info(first_entry.get("id"))
             if not additional:
                 raise APIException("no data")
             additional["media_type"] = "tv"
 
             result = TVShow(**additional)
-        elif type_ == Person:
+        elif type_ == "person":
             # additional = await self._person_info(first_entry.get("id"))
             # if not additional:
             #     raise APIException("no data")
@@ -104,7 +103,6 @@ class Client:
         self.cache.item_set(result)
 
         return result
-
 
     async def _search_get(self, endpoint, query=None, page=None, instantiate_types=True, **fields) -> Union[list, dict, None]:
         payload = {

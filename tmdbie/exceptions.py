@@ -1,6 +1,8 @@
+# coding=utf-8
 """
 Exceptions for TMDbie
 """
+
 
 class TMDbException(Exception):
     """
@@ -27,6 +29,7 @@ class APIException(TMDbException):
     General exception class when it's not a client problem
     """
     pass
+
 
 class RatelimitException(APIException):
     """
