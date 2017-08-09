@@ -116,7 +116,7 @@ class AioHttpConnector(Connector, metaclass=Singleton):
             log.critical("Could not import aiohttp")
             raise ImportError("module aiohttp not found")
 
-        self.session = self.aio.ClientSession(loop=loop, json_serialize=loads)
+        self.session = self.aio.ClientSession(loop=loop)
 
     async def request(self, url, fields: dict, exit_on_ratelimit=False) -> dict:
         # Make a valid url with all the provided fields
@@ -147,9 +147,9 @@ class AioHttpConnector(Connector, metaclass=Singleton):
                 raise HTTPException("Got status code {}".format(resp.status))
 
             # Use custom lib for json parsing
-            text = await resp.text()
+            json_data = await resp.json(loads=loads)
 
-            if not text:
+            if not json_data:
                 raise DecodeError("empty response")
 
-            return loads(text)
+            return json_data
