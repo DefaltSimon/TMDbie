@@ -35,7 +35,10 @@ class CacheManager(metaclass=Singleton):
         else:
             return False
 
-    def _get_name_from_cache(self, name):
+    def get_item_by_name(self, name):
+        """
+        Finds item by name, returns None if not found
+        """
         query = str(name).lower()
         id_ = self.name_to_id.get(query)
 
@@ -44,7 +47,10 @@ class CacheManager(metaclass=Singleton):
         else:
             return None
 
-    def _get_id_from_cache(self, id_):
+    def get_item_by_id(self, id_):
+        """
+        Finds item by id, returns None if not found
+        """
         if self._is_valid(id_):
             return self.cache.get(id_)
         else:
@@ -58,9 +64,9 @@ class CacheManager(metaclass=Singleton):
         try:
             int(search)
         except ValueError:
-            return self._get_name_from_cache(search)
+            return self.get_item_by_name(search)
         else:
-            return self._get_id_from_cache(search)
+            return self.get_item_by_id(search)
 
     def item_set(self, item):
         if not isinstance(item, TMDbType):
