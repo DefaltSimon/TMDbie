@@ -23,10 +23,10 @@ log.setLevel(logging.INFO)
 
 
 class Client:
-    def __init__(self, api_key: str, connector=None):
+    def __init__(self, api_key: str, connector=None, cache_manager=CacheManager):
         self.api_key = str(api_key)
 
-        self.cache = CacheManager()
+        self.cache = cache_manager()
 
         if not connector:
             self.req = AioHttpConnector()
